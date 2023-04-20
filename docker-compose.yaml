@@ -2,18 +2,26 @@ version: "3"
 services:
   db:
     container_name: db
-    image: neo4j:latest
-    restart: always
+    image: neo4j:5.6.0
     environment:
       - NEO4J_AUTH=neo4j/password
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,algo.*
+      - NEO4J_dbms_security_procedures_whitelist=apoc.*,algo.*
+      - NEO4J_apoc_uuid_enabled=true
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_PLUGINS=["apoc"]
     ports:
       - "7474:7474"
       - "7687:7687"
     volumes:
       - ./neo4j/data:/data
-      - ./neo4j/logs:/logs
-      - ./neo4j/import:/import
+      - ./neo4j/conf:/conf
       - ./neo4j/plugins:/plugins
+    # command: dump-config
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
 
   app:
     build: .
@@ -23,4 +31,6 @@ services:
     depends_on:
       - db
     volumes:
-      - .:/src
+      - .:/app
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
