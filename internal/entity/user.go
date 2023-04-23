@@ -6,10 +6,11 @@ import (
 )
 
 type User struct {
-	ID       entity.ID `json:"id"`
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	Password string    `json:"-"`
+	ID       int64  `json:"id"`
+	UUID     string `json:"uuid"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"-"`
 }
 
 func NewUser(name, email, password string) (*User, error) {
@@ -18,7 +19,7 @@ func NewUser(name, email, password string) (*User, error) {
 		return nil, err
 	}
 	return &User{
-		ID:       entity.NewID(),
+		UUID:     entity.NewStrigID(),
 		Name:     name,
 		Email:    email,
 		Password: string(hash),
