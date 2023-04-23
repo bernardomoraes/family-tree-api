@@ -3,6 +3,7 @@ module github.com/bernardomoraes/family-tree
 go 1.18
 
 require (
+	github.com/go-chi/chi v1.5.1
 	github.com/go-chi/jwtauth v1.2.0
 	github.com/neo4j/neo4j-go-driver/v5 v5.7.0
 	github.com/spf13/viper v1.15.0
@@ -11,8 +12,6 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 )
 
@@ -40,5 +39,4 @@ require (
 	golang.org/x/text v0.5.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/gorm v1.25.0
 )
