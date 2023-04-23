@@ -14,16 +14,17 @@ var (
 )
 
 type Person struct {
-	ID        entity.ID `json:"id"`
+	ID        int64     `json:"id"`
+	UUID      string    `json:"uuid"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func NewPerson(name string) (*Person, error) {
 	product := &Person{
-		ID:        entity.NewID(),
-		Name:      name,
-		CreatedAt: time.Now(),
+		UUID: entity.NewStrigID(),
+		Name: name,
 	}
 
 	err := product.Validate()
@@ -35,11 +36,11 @@ func NewPerson(name string) (*Person, error) {
 }
 
 func (p *Person) Validate() error {
-	if p.ID.String() == "" {
+	if p.UUID == "" {
 		return ErrIDIsRequired
 	}
 
-	if _, err := entity.ParseID(p.ID.String()); err != nil {
+	if _, err := entity.ParseID(p.UUID); err != nil {
 		return ErrInvalidID
 	}
 
