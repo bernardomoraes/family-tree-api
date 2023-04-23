@@ -3,7 +3,6 @@ module github.com/bernardomoraes/family-tree
 go 1.18
 
 require (
-	github.com/go-chi/chi v1.5.1
 	github.com/go-chi/jwtauth v1.2.0
 	github.com/neo4j/neo4j-go-driver/v5 v5.7.0
 	github.com/spf13/viper v1.15.0
@@ -17,6 +16,7 @@ require (
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/goccy/go-json v0.3.5 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/hcl v1.0.0 // indirect
