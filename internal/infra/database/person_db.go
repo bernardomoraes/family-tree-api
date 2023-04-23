@@ -97,8 +97,14 @@ func (p *Person) Update(ctx context.Context, person *entity.Person) (*entity.Per
 	return &personParsed[0], err
 }
 
-// func (p *Person) FindByEmail(email string) (*entity.Person, error) {
-// 	var person entity.Person
-// 	err := p.DB.Where("email = ?", email).First(&person).Error
-// 	return &person, err
-// }
+func (p *Person) Delete(ctx context.Context, uuid string) error {
+	session := helpers.NewSession(ctx, p.DBDriver, neo4j.AccessModeWrite)
+	defer session.Close(ctx)
+
+	_, err := session.Run(ctx, "MATCH (p:PERSON {uuid: $uuid}) DETACH DELETE p", map[string]interface{}{"uuid": uuid})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

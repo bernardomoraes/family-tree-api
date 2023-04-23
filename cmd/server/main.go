@@ -49,6 +49,9 @@ func configureEndpoints(router chi.Router, driver helpers.AvailableDatabaseDrive
 		// rw.Header().Add("Content-Type", "application/json")
 		personHandler.UpdatePerson(rw, r)
 	})
+	router.Delete("/person/{uuid}", func(rw http.ResponseWriter, r *http.Request) {
+		personHandler.DeletePerson(rw, r)
+	})
 }
 
 func configureRouter(portNumber string, driverDatabase helpers.AvailableDatabaseDrivers) (string, *chi.Mux) {
@@ -188,6 +191,43 @@ func (h *PersonHandler) UpdatePerson(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
 	rw.WriteHeader(http.StatusCreated)
 	json.NewEncoder(rw).Encode(&output)
+}
+func (h *PersonHandler) DeletePerson(rw http.ResponseWriter, r *http.Request) {
+	person := dto.FindPersonInput{
+		UUID: chi.URLParam(r, "uuid"),
+	}
+
+	personFinded, err := h.PersonDB.FindByUUID(r.Context(), person.UUID)
+	if err != nil {
+		fmt.Println("Database Error:", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if personFinded == nil {
+		rw.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": "Person not found with UUID: " + person.UUID,
+		})
+		return
+	}
+
+	err = h.PersonDB.Delete(r.Context(), personFinded.UUID)
+	if err != nil {
+		fmt.Println("err:", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	rw.WriteHeader(http.StatusOK)
+	json.NewEncoder(rw).Encode(map[string]interface{}{
+		"message": "Person deleted successfully",
+	})
 }
 
 func main() {
