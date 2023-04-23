@@ -4,20 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bernardomoraes/family-tree/internal/entity"
 	"github.com/mitchellh/mapstructure"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
-
-type AvailableTypesToParse interface {
-	entity.User | entity.Person
-}
 
 type AvailableDatabaseDrivers interface {
 	neo4j.DriverWithContext
 }
 
-func GetDbResponseParsed[T AvailableTypesToParse](ctx context.Context, result neo4j.ResultWithContext, resultType T) ([]T, error) {
+func GetDbResponseParsed[T any](ctx context.Context, result neo4j.ResultWithContext, resultType T) ([]T, error) {
 	record := result.Record()
 	response := []T{}
 
