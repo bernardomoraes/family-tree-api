@@ -2,16 +2,6 @@ package dto
 
 import "time"
 
-type CreatePersonInput struct {
-	Name string `json:"name" validate:"required"`
-}
-
-type CreatePersonOutput struct {
-	Name      string `json:"name"`
-	UUID      string `json:"uuid"`
-	CreatedAt string `json:"created_at"`
-}
-
 type FindPersonInput struct {
 	UUID string `json:"uuid" validate:"required"`
 }

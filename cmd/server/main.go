@@ -26,19 +26,10 @@ func main() {
 	webserver := webserver.NewWebServer(config.WebserverPort)
 	webPersonHandler := handlers.NewWebPersonHandler(personDB)
 
-	// webserver.AddMethod("GET", "/", func(rw http.ResponseWriter, r *http.Request) {
-	// 	rw.Header().Add("Content-Type", "application/json")
-	// 	rw.Header().Set("Access-Control-Allow-Origin", "*")
-	// 	rw.WriteHeader(http.StatusOK)
-
-	// 	json.NewEncoder(rw).Encode(map[string]string{
-	// 		"message": "Welcome to the Family Tree API",
-	// 	})
-	// })
-	webserver.AddMethod("POST", "/person", webPersonHandler.CreatePerson)
-	webserver.AddMethod("GET", "/person/{uuid}", webPersonHandler.GetPerson)
-	webserver.AddMethod("PUT", "/person/{uuid}", webPersonHandler.UpdatePerson)
-	webserver.AddMethod("DELETE", "/person/{uuid}", webPersonHandler.DeletePerson)
+	webserver.AddMethod("POST", "/person", webPersonHandler.Create)
+	webserver.AddMethod("GET", "/person/{uuid}", webPersonHandler.FindOne)
+	webserver.AddMethod("PUT", "/person/{uuid}", webPersonHandler.Update)
+	webserver.AddMethod("DELETE", "/person/{uuid}", webPersonHandler.Delete)
 
 	webserver.Start()
 }

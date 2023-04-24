@@ -3,18 +3,9 @@ package usecase
 import (
 	"context"
 
+	"github.com/bernardomoraes/family-tree/internal/dto"
 	"github.com/bernardomoraes/family-tree/internal/entity"
 )
-
-type CreatePersonInputDTO struct {
-	Name string `json:"name" validate:"required"`
-}
-
-type CreatePersonOutputDTO struct {
-	Name      string `json:"name"`
-	UUID      string `json:"uuid"`
-	CreatedAt string `json:"created_at"`
-}
 
 type CreatePersonUseCase struct {
 	PersonRepository entity.PersonRepositoryInterface
@@ -26,7 +17,7 @@ func NewCreatePersonUseCase(personRepository entity.PersonRepositoryInterface) *
 	}
 }
 
-func (c *CreatePersonUseCase) Execute(ctx context.Context, input *CreatePersonInputDTO) (*CreatePersonOutputDTO, error) {
+func (c *CreatePersonUseCase) Execute(ctx context.Context, input *dto.CreatePersonInputDTO) (*dto.CreatePersonOutputDTO, error) {
 	person, err := entity.NewPerson(input.Name)
 	if err != nil {
 		return nil, err
@@ -41,7 +32,7 @@ func (c *CreatePersonUseCase) Execute(ctx context.Context, input *CreatePersonIn
 		return nil, err
 	}
 
-	output := &CreatePersonOutputDTO{
+	output := &dto.CreatePersonOutputDTO{
 		Name:      person.Name,
 		UUID:      person.UUID,
 		CreatedAt: person.CreatedAt.String(),

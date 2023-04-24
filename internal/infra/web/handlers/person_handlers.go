@@ -7,6 +7,7 @@ import (
 
 	"github.com/bernardomoraes/family-tree/internal/dto"
 	"github.com/bernardomoraes/family-tree/internal/entity"
+	"github.com/bernardomoraes/family-tree/internal/usecase"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -20,8 +21,8 @@ func NewWebPersonHandler(db entity.PersonRepositoryInterface) *PersonHandler {
 	}
 }
 
-func (h *PersonHandler) CreatePerson(rw http.ResponseWriter, r *http.Request) {
-	var person dto.CreatePersonInput
+func (h *PersonHandler) Create(rw http.ResponseWriter, r *http.Request) {
+	var person dto.CreatePersonInputDTO
 
 	err := json.NewDecoder(r.Body).Decode(&person)
 	if err != nil {
@@ -29,32 +30,26 @@ func (h *PersonHandler) CreatePerson(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := entity.NewPerson(person.Name)
+	output, err := usecase.NewCreatePersonUseCase(h.PersonDB).Execute(r.Context(), &person)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	personCreated, err := h.PersonDB.Create(r.Context(), p)
-
-	if err != nil {
-		fmt.Println("err:", err)
 		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": err.Error(),
+		})
 		return
 	}
-	rw.Header().Add("Content-Type", "application/json")
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
+
 	rw.WriteHeader(http.StatusCreated)
-	json.NewEncoder(rw).Encode(&personCreated)
+	json.NewEncoder(rw).Encode(&output)
 }
-func (h *PersonHandler) GetPerson(rw http.ResponseWriter, r *http.Request) {
+
+func (h *PersonHandler) FindOne(rw http.ResponseWriter, r *http.Request) {
 	person := dto.FindPersonInput{
 		UUID: chi.URLParam(r, "uuid"),
 	}
 
 	personFinded, err := h.PersonDB.FindByUUID(r.Context(), person.UUID)
 	if err != nil {
-		fmt.Println("Database Error:", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(rw).Encode(map[string]interface{}{
 			"message": err.Error(),
@@ -75,7 +70,7 @@ func (h *PersonHandler) GetPerson(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusFound)
 	json.NewEncoder(rw).Encode(&personFinded)
 }
-func (h *PersonHandler) UpdatePerson(rw http.ResponseWriter, r *http.Request) {
+func (h *PersonHandler) Update(rw http.ResponseWriter, r *http.Request) {
 	person := dto.FindPersonInput{
 		UUID: chi.URLParam(r, "uuid"),
 	}
@@ -133,7 +128,7 @@ func (h *PersonHandler) UpdatePerson(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 	json.NewEncoder(rw).Encode(&output)
 }
-func (h *PersonHandler) DeletePerson(rw http.ResponseWriter, r *http.Request) {
+func (h *PersonHandler) Delete(rw http.ResponseWriter, r *http.Request) {
 	person := dto.FindPersonInput{
 		UUID: chi.URLParam(r, "uuid"),
 	}
