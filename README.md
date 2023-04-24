@@ -4,7 +4,7 @@ This project aims to create an API to manage a family tree with the ability to c
 
 ## **Core Requirements**
 
-- [ ]  Post endpoint that receives as a body param the person's name and creates a new Person entity.
+- [x]  Post endpoint that receives as a body param the person's name and creates a new Person entity.
 - [ ]  Post endpoint that receives as a body param the parent's and child's identifiers and creates a parent-child relationship between them.
 - [ ]  Get endpoint that returns a person's genealogical tree, including all possible ancestors up to their level.
 
@@ -35,12 +35,11 @@ This project aims to create an API to manage a family tree with the ability to c
 ## **Final Considerations**
 
 - I decided to use the **[Go](https://golang.org/)** programming language to implement the API.
-- ~~Use **[Gin](https://github.com/gin-gonic/gin)** web framework to create the endpoints.~~ (WIP)
+- Use **[Chi](https://go-chi.io/)** as the router.
 - Use **[Neo4j](https://neo4j.com/)** as the database and interact with it using the **[Neo4j Go Driver](https://github.com/neo4j/neo4j-go-driver)**.
-- ~~Use the Repository pattern to interact with the database.~~ (WIP)
+- Use the Repository pattern to interact with the database.
 - Implement Unit Tests and Integration Tests using **[Testify](https://github.com/stretchr/testify)**.
     
 
 ## **Future Improvements**
-
 - WIP
