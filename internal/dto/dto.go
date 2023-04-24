@@ -1,9 +1,8 @@
 package dto
 
-import "time"
-
-type FindPersonInput struct {
-	UUID string `json:"uuid" validate:"required"`
+type AuditTrail struct {
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt,omitempty"`
 }
 
 type Relationship struct {
@@ -11,24 +10,6 @@ type Relationship struct {
 	UUID         string `json:"uuid"`
 	Relationship string `json:"relationship"`
 }
-
-type FindPersonOutput struct {
-	Name          string         `json:"name"`
-	UUID          string         `json:"uuid"`
-	Relationships []Relationship `json:"relationships"`
-}
-
-type UpdatePersonInput struct {
-	Name string `json:"name" validate:"required"`
-}
-
-type UpdatePersonOutput struct {
-	Name      string    `json:"name"`
-	UUID      string    `json:"uuid"`
-	UpdatedAt time.Time `json:"updated_at"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
 type CreateRelationshipInput struct {
 	UUID          string `json:"uuid" validate:"required"`
 	Relationship  string `json:"relationship" validate:"required"`
