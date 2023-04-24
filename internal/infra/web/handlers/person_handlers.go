@@ -127,40 +127,32 @@ func (h *PersonHandler) Update(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 	json.NewEncoder(rw).Encode(&output)
 }
+
 func (h *PersonHandler) Delete(rw http.ResponseWriter, r *http.Request) {
-	person := dto.FindPersonInputDTO{
+	person := dto.DeletePersonInputDTO{
 		UUID: chi.URLParam(r, "uuid"),
 	}
 
-	personFinded, err := h.PersonDB.FindByUUID(r.Context(), person.UUID)
-	if err != nil {
-		fmt.Println("Database Error:", err)
-		rw.WriteHeader(http.StatusInternalServerError)
+	err := usecase.NewDeletePersonUseCase(h.PersonDB).Execute(r.Context(), &person)
+	if err == nil {
+		rw.WriteHeader(http.StatusOK)
 		json.NewEncoder(rw).Encode(map[string]interface{}{
-			"message": err.Error(),
+			"message": "Person deleted successfully",
 		})
 		return
 	}
 
-	if personFinded == nil {
+	var errMessage string
+	switch err.Error() {
+	case "person not found":
 		rw.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(rw).Encode(map[string]interface{}{
-			"message": "Person not found with UUID: " + person.UUID,
-		})
-		return
-	}
-
-	err = h.PersonDB.Delete(r.Context(), personFinded.UUID)
-	if err != nil {
-		fmt.Println("err:", err)
+		errMessage = "Person not found with UUID: " + person.UUID
+	default:
 		rw.WriteHeader(http.StatusInternalServerError)
-		return
+		errMessage = err.Error()
 	}
 
-	rw.Header().Add("Content-Type", "application/json")
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
-	rw.WriteHeader(http.StatusOK)
 	json.NewEncoder(rw).Encode(map[string]interface{}{
-		"message": "Person deleted successfully",
+		"message": errMessage,
 	})
 }

@@ -30,3 +30,7 @@ type UpdatePersonOutputDTO struct {
 	UUID string `json:"uuid"`
 	AuditTrail
 }
+
+type DeletePersonInputDTO struct {
+	UUID string `json:"uuid" validate:"required"`
+}
