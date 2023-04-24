@@ -3,6 +3,7 @@ package helpers
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
@@ -25,11 +26,20 @@ func GetDbResponseParsed[T any](ctx context.Context, result neo4j.ResultWithCont
 		recordItemProps := recordItem.(neo4j.Node).Props
 		recordItemProps["id"] = recordItem.(neo4j.Node).GetId()
 
+		if recordItemProps["createdAt"] != nil {
+			recordItemProps["createdAt"] = recordItemProps["createdAt"].(time.Time).Format(time.RFC3339)
+		}
+
+		if recordItemProps["updatedAt"] != nil {
+			recordItemProps["updatedAt"] = recordItemProps["updatedAt"].(time.Time).Format(time.RFC3339)
+		}
+
 		err := mapstructure.Decode(recordItemProps, &resultType)
 		if err != nil {
 			fmt.Println("Error decoding record item")
 			return nil, err
 		}
+
 		response = append(response, resultType)
 	}
 	fmt.Println("response:", response)

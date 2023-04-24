@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/bernardomoraes/family-tree/internal/entity"
 	"github.com/bernardomoraes/family-tree/pkg/helpers"
@@ -24,12 +23,11 @@ func (p *Person) Create(ctx context.Context, person *entity.Person) (*entity.Per
 	defer session.Close(ctx)
 
 	parameters := map[string]interface{}{
-		"uuid":       person.UUID,
-		"name":       person.Name,
-		"created_at": time.Now().String(),
+		"uuid": person.UUID,
+		"name": person.Name,
 	}
 
-	dbResult, err := session.Run(ctx, "CREATE (person:PERSON {uuid: $uuid, name: $name, created_at: datetime()}) RETURN person",
+	dbResult, err := session.Run(ctx, "CREATE (person:PERSON {uuid: $uuid, name: $name, createdAt: datetime.statement()}) RETURN person",
 		parameters)
 
 	if err != nil {
@@ -76,7 +74,7 @@ func (p *Person) Update(ctx context.Context, person *entity.Person) (*entity.Per
 	session := helpers.NewSession(ctx, p.DBDriver, neo4j.AccessModeWrite)
 	defer session.Close(ctx)
 
-	queryResult, err := session.Run(ctx, "MATCH (u:PERSON {uuid: $uuid}) SET u.name = $name, u.updated_at=localdatetime() RETURN u",
+	queryResult, err := session.Run(ctx, "MATCH (u:PERSON {uuid: $uuid}) SET u.name = $name, u.updatedAt=datetime() RETURN u",
 		map[string]interface{}{
 			"uuid": person.UUID,
 			"name": person.Name,
