@@ -7,7 +7,7 @@ import (
 
 	"github.com/bernardomoraes/family-tree/internal/dto"
 	"github.com/bernardomoraes/family-tree/internal/entity"
-	"github.com/bernardomoraes/family-tree/internal/usecase"
+	usecase "github.com/bernardomoraes/family-tree/internal/usecase/person"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -44,11 +44,11 @@ func (h *PersonHandler) Create(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PersonHandler) FindOne(rw http.ResponseWriter, r *http.Request) {
-	person := dto.FindPersonInput{
+	person := dto.FindPersonInputDTO{
 		UUID: chi.URLParam(r, "uuid"),
 	}
 
-	personFinded, err := h.PersonDB.FindByUUID(r.Context(), person.UUID)
+	personFinded, err := usecase.NewFindOnePersonUseCase(h.PersonDB).Execute(r.Context(), &person)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(rw).Encode(map[string]interface{}{
@@ -64,14 +64,13 @@ func (h *PersonHandler) FindOne(rw http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	fmt.Println("personFinded:", personFinded)
 
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
 	rw.WriteHeader(http.StatusFound)
 	json.NewEncoder(rw).Encode(&personFinded)
 }
+
 func (h *PersonHandler) Update(rw http.ResponseWriter, r *http.Request) {
-	person := dto.FindPersonInput{
+	person := dto.FindPersonInputDTO{
 		UUID: chi.URLParam(r, "uuid"),
 	}
 	fmt.Println("person:", person.UUID)
@@ -94,7 +93,7 @@ func (h *PersonHandler) Update(rw http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("personFinded:", personFinded)
 
-	var personInput dto.UpdatePersonInput
+	var personInput dto.UpdatePersonInputDTO
 	err = json.NewDecoder(r.Body).Decode(&personInput)
 	if err != nil {
 		fmt.Println("err:", err)
@@ -109,14 +108,14 @@ func (h *PersonHandler) Update(rw http.ResponseWriter, r *http.Request) {
 
 	personUpdated, err := h.PersonDB.Update(r.Context(), personFinded)
 
-	// output := dto.UpdatePersonOutput{...personUpdated}
-	var output dto.UpdatePersonOutput
-	output.Name = personUpdated.Name
-	output.UUID = personUpdated.UUID
-	output.CreatedAt = personUpdated.CreatedAt
-	output.UpdatedAt = personUpdated.UpdatedAt
-
-	// fmt.Println("personCreated:", personCreated)
+	output := dto.UpdatePersonOutputDTO{
+		Name: personUpdated.Name,
+		UUID: personUpdated.UUID,
+		AuditTrail: dto.AuditTrail{
+			CreatedAt: personUpdated.CreatedAt,
+			UpdatedAt: personUpdated.UpdatedAt,
+		},
+	}
 
 	if err != nil {
 		fmt.Println("err:", err)
@@ -129,7 +128,7 @@ func (h *PersonHandler) Update(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&output)
 }
 func (h *PersonHandler) Delete(rw http.ResponseWriter, r *http.Request) {
-	person := dto.FindPersonInput{
+	person := dto.FindPersonInputDTO{
 		UUID: chi.URLParam(r, "uuid"),
 	}
 
