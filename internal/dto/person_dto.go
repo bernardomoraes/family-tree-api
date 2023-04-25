@@ -50,3 +50,9 @@ type GetAncestorsOutput struct {
 	Relationships *RelationshipList `json:"relationships,omitempty"`
 	Ancestors     []Ancestors       `json:"ancestors"`
 }
+
+type GetFamilyOutput struct {
+	Person
+	Relationships *RelationshipList `json:"relationships,omitempty"`
+	Family        []Ancestors       `json:"ancestors"`
+}

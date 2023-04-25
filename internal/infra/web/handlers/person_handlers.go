@@ -177,20 +177,10 @@ func (h *PersonHandler) GetAncestors(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if person.UUID == "" {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(map[string]interface{}{
-			"message": "Field uuid with valid UUID is required",
-		})
-		return
-	}
-
 	ancestors, err := usecase.NewGetAncestorsUseCase(h.PersonDB).Execute(r.Context(), &person)
 	if err != nil {
 		switch err {
-		case entity.ErrStartAndEndIsRequired:
-			rw.WriteHeader(http.StatusBadRequest)
-		case entity.ErrInvalidType:
+		case entity.ErrIDIsRequired:
 			rw.WriteHeader(http.StatusBadRequest)
 		default:
 			rw.WriteHeader(http.StatusInternalServerError)
@@ -204,4 +194,30 @@ func (h *PersonHandler) GetAncestors(rw http.ResponseWriter, r *http.Request) {
 
 	rw.WriteHeader(http.StatusOK)
 	json.NewEncoder(rw).Encode(ancestors)
+}
+
+func (h *PersonHandler) GetFamily(rw http.ResponseWriter, r *http.Request) {
+	person := dto.GetAncestorsInput{
+		UUID: chi.URLParam(r, "uuid"),
+	}
+	if person.UUID == "" {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": errors.New("field uuid is required").Error(),
+		})
+		return
+	}
+
+	family, err := usecase.NewGetFamilyUseCase(h.PersonDB).Execute(r.Context(), &person)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": err,
+		})
+		return
+	}
+
+	rw.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(rw).Encode(family)
+
 }

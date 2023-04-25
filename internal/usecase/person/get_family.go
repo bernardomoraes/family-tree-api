@@ -7,17 +7,17 @@ import (
 	"github.com/bernardomoraes/family-tree/internal/entity"
 )
 
-type GetAncestorsUseCase struct {
+type GetFamilyUseCase struct {
 	PersonRepository entity.PersonRepositoryInterface
 }
 
-func NewGetAncestorsUseCase(repository entity.PersonRepositoryInterface) *GetAncestorsUseCase {
-	return &GetAncestorsUseCase{
+func NewGetFamilyUseCase(repository entity.PersonRepositoryInterface) *GetFamilyUseCase {
+	return &GetFamilyUseCase{
 		PersonRepository: repository,
 	}
 }
 
-func (r *GetAncestorsUseCase) Execute(ctx context.Context, input *dto.GetAncestorsInput) (*dto.GetAncestorsOutput, error) {
+func (r *GetFamilyUseCase) Execute(ctx context.Context, input *dto.GetAncestorsInput) (*dto.GetFamilyOutput, error) {
 	person, err := r.PersonRepository.FindByUUID(ctx, input.UUID)
 	if err != nil {
 		return nil, err
@@ -27,21 +27,21 @@ func (r *GetAncestorsUseCase) Execute(ctx context.Context, input *dto.GetAncesto
 		return nil, nil
 	}
 
-	ancestors, err := r.PersonRepository.FindAncestors(ctx, person)
+	Family, err := r.PersonRepository.FindFamily(ctx, person)
 	if err != nil {
 		return nil, err
 	}
 
-	output := &dto.GetAncestorsOutput{
+	output := &dto.GetFamilyOutput{
 		Person: dto.Person{
 			Name: person.Name,
 			UUID: person.UUID,
 		},
-		Ancestors: []dto.Ancestors{},
+		Family: []dto.Ancestors{},
 	}
 
-	for _, ancestor := range ancestors {
-		output.Ancestors = append(output.Ancestors, dto.Ancestors{
+	for _, ancestor := range Family {
+		output.Family = append(output.Family, dto.Ancestors{
 			Person: dto.Person{
 				Name: ancestor.Name,
 				UUID: ancestor.UUID,

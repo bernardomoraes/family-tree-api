@@ -16,6 +16,7 @@ type PersonRepositoryInterface interface {
 	Update(ctx context.Context, person *Person) (*Person, error)
 	Delete(ctx context.Context, uuid string) error
 	FindAncestors(ctx context.Context, person *Person) ([]*Person, error)
+	FindFamily(ctx context.Context, person *Person) ([]*Person, error)
 }
 
 type RelationshipRepositoryInterface interface {

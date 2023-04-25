@@ -35,6 +35,7 @@ func main() {
 	webserver.AddMethod("PUT", "/person/{uuid}", webPersonHandler.Update)
 	webserver.AddMethod("DELETE", "/person/{uuid}", webPersonHandler.Delete)
 	webserver.AddMethod("GET", "/person/{uuid}/ancestors", webPersonHandler.GetAncestors)
+	webserver.AddMethod("GET", "/person/{uuid}/family", webPersonHandler.GetFamily)
 
 	// Relationship routes
 	webserver.AddMethod("POST", "/relationship", webRelationshipHandler.CreateIsParent)
