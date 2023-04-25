@@ -33,8 +33,10 @@ func (c *CreatePersonUseCase) Execute(ctx context.Context, input *dto.CreatePers
 	}
 
 	output := &dto.CreatePersonOutputDTO{
-		Name: person.Name,
-		UUID: person.UUID,
+		Person: dto.Person{
+			Name: person.Name,
+			UUID: person.UUID,
+		},
 		AuditTrail: dto.AuditTrail{
 			CreatedAt: person.CreatedAt,
 			UpdatedAt: person.UpdatedAt,

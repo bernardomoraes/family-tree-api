@@ -36,12 +36,3 @@ func SetField(v interface{}, name string, value string) error {
 	fv.SetString(value)
 	return nil
 }
-
-func Contains[T comparable](s []T, e T) bool {
-	for _, v := range s {
-		if v == e {
-			return true
-		}
-	}
-	return false
-}

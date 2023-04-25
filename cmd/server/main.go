@@ -21,15 +21,23 @@ func main() {
 	println("Driver configured")
 
 	personDB := database.NewPerson(neoDriver)
+	relationshipDB := database.NewRelationship(neoDriver)
 	println("Database configured")
 
 	webserver := webserver.NewWebServer(config.WebserverPort)
 	webPersonHandler := handlers.NewWebPersonHandler(personDB)
+	webRelationshipHandler := handlers.NewWebRelationshipHandler(relationshipDB)
 
+	// Person routes
 	webserver.AddMethod("POST", "/person", webPersonHandler.Create)
 	webserver.AddMethod("GET", "/person/{uuid}", webPersonHandler.FindOne)
+	webserver.AddMethod("GET", "/person/name/{name}", webPersonHandler.FindOne)
 	webserver.AddMethod("PUT", "/person/{uuid}", webPersonHandler.Update)
 	webserver.AddMethod("DELETE", "/person/{uuid}", webPersonHandler.Delete)
+	webserver.AddMethod("GET", "/person/{uuid}/ancestors", webPersonHandler.GetAncestors)
+
+	// Relationship routes
+	webserver.AddMethod("POST", "/relationship", webRelationshipHandler.CreateIsParent)
 
 	webserver.Start()
 }

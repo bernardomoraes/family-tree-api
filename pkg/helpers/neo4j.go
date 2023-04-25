@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bernardomoraes/family-tree/internal/entity"
 	"github.com/mitchellh/mapstructure"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
@@ -42,7 +43,57 @@ func GetDbResponseParsed[T any](ctx context.Context, result neo4j.ResultWithCont
 
 		response = append(response, resultType)
 	}
-	fmt.Println("response:", response)
+	return response, nil
+}
+
+func GetDbResponse[T any](ctx context.Context, result neo4j.ResultWithContext, resultType T) ([]T, error) {
+	record := result.Record()
+	response := []T{}
+
+	for result.NextRecord(ctx, &record) {
+		fmt.Println("record:", record)
+		recordItem, found := record.Get(record.Keys[0])
+		if !found {
+			fmt.Println("Not found record item")
+			continue
+		}
+
+		err := mapstructure.Decode(recordItem, &resultType)
+		if err != nil {
+			fmt.Println("Error decoding record item")
+			return nil, err
+		}
+		response = append(response, resultType)
+	}
+	return response, nil
+}
+func GetDbResponseAncestors[T *entity.Person](ctx context.Context, result neo4j.ResultWithContext, resultType *entity.Person) ([]T, error) {
+	record := result.Record()
+	response := []T{}
+
+	for result.NextRecord(ctx, &record) {
+		fmt.Println("record:", record)
+		recordItem, found := record.Get(record.Keys[0])
+
+		if !found {
+			fmt.Println("Not found record item")
+			continue
+		}
+		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+			WeaklyTypedInput: false,
+			Result:           &resultType,
+			ZeroFields:       true,
+		})
+		decoder.Decode(recordItem)
+
+		if err != nil {
+			fmt.Println("Error decoding record item")
+			return nil, err
+		}
+
+		fmt.Println("resultType:", resultType)
+		response = append(response, resultType)
+	}
 	return response, nil
 }
 

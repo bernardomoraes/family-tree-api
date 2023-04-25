@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"github.com/bernardomoraes/family-tree/internal/dto"
 	"github.com/bernardomoraes/family-tree/internal/entity"
@@ -18,7 +19,18 @@ func NewFindOnePersonUseCase(repository entity.PersonRepositoryInterface) *FindO
 }
 
 func (f *FindOnePersonUseCase) Execute(ctx context.Context, input *dto.FindPersonInputDTO) (*dto.FindPersonOutputDTO, error) {
-	person, err := f.Repository.FindByUUID(ctx, input.UUID)
+	var person *entity.Person
+	var err error
+
+	switch {
+	case input.UUID != "":
+		person, err = f.Repository.FindByUUID(ctx, input.UUID)
+	case input.Name != "":
+		person, err = f.Repository.FindByName(ctx, input.Name)
+	default:
+		return nil, errors.New("missing input parameters")
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -28,8 +40,10 @@ func (f *FindOnePersonUseCase) Execute(ctx context.Context, input *dto.FindPerso
 	}
 
 	output := &dto.FindPersonOutputDTO{
-		Name:          person.Name,
-		UUID:          person.UUID,
+		Person: dto.Person{
+			Name: person.Name,
+			UUID: person.UUID,
+		},
 		Relationships: []dto.Relationship{},
 		AuditTrail: dto.AuditTrail{
 			CreatedAt: person.CreatedAt,

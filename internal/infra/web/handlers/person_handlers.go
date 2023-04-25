@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -45,7 +46,10 @@ func (h *PersonHandler) Create(rw http.ResponseWriter, r *http.Request) {
 
 func (h *PersonHandler) FindOne(rw http.ResponseWriter, r *http.Request) {
 	person := dto.FindPersonInputDTO{
-		UUID: chi.URLParam(r, "uuid"),
+		Person: dto.Person{
+			Name: chi.URLParam(r, "name"),
+			UUID: chi.URLParam(r, "uuid"),
+		},
 	}
 
 	personFinded, err := usecase.NewFindOnePersonUseCase(h.PersonDB).Execute(r.Context(), &person)
@@ -60,7 +64,7 @@ func (h *PersonHandler) FindOne(rw http.ResponseWriter, r *http.Request) {
 	if personFinded == nil {
 		rw.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(rw).Encode(map[string]interface{}{
-			"message": "Person not found with UUID: " + person.UUID,
+			"message": "Person not found",
 		})
 		return
 	}
@@ -71,7 +75,9 @@ func (h *PersonHandler) FindOne(rw http.ResponseWriter, r *http.Request) {
 
 func (h *PersonHandler) Update(rw http.ResponseWriter, r *http.Request) {
 	person := dto.FindPersonInputDTO{
-		UUID: chi.URLParam(r, "uuid"),
+		Person: dto.Person{
+			UUID: chi.URLParam(r, "uuid"),
+		},
 	}
 	fmt.Println("person:", person.UUID)
 	personFinded, err := h.PersonDB.FindByUUID(r.Context(), person.UUID)
@@ -109,8 +115,10 @@ func (h *PersonHandler) Update(rw http.ResponseWriter, r *http.Request) {
 	personUpdated, err := h.PersonDB.Update(r.Context(), personFinded)
 
 	output := dto.UpdatePersonOutputDTO{
-		Name: personUpdated.Name,
-		UUID: personUpdated.UUID,
+		Person: dto.Person{
+			Name: person.Name,
+			UUID: person.UUID,
+		},
 		AuditTrail: dto.AuditTrail{
 			CreatedAt: personUpdated.CreatedAt,
 			UpdatedAt: personUpdated.UpdatedAt,
@@ -155,4 +163,45 @@ func (h *PersonHandler) Delete(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(map[string]interface{}{
 		"message": errMessage,
 	})
+}
+
+func (h *PersonHandler) GetAncestors(rw http.ResponseWriter, r *http.Request) {
+	person := dto.GetAncestorsInput{
+		UUID: chi.URLParam(r, "uuid"),
+	}
+	if person.UUID == "" {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": errors.New("field uuid is required").Error(),
+		})
+		return
+	}
+
+	if person.UUID == "" {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": "Field uuid with valid UUID is required",
+		})
+		return
+	}
+
+	ancestors, err := usecase.NewGetAncestorsUseCase(h.PersonDB).Execute(r.Context(), &person)
+	if err != nil {
+		switch err {
+		case entity.ErrStartAndEndIsRequired:
+			rw.WriteHeader(http.StatusBadRequest)
+		case entity.ErrInvalidType:
+			rw.WriteHeader(http.StatusBadRequest)
+		default:
+			rw.WriteHeader(http.StatusInternalServerError)
+		}
+
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+	json.NewEncoder(rw).Encode(ancestors)
 }

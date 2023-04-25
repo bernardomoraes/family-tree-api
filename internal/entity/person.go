@@ -12,26 +12,35 @@ var (
 	ErrNameIsRequired = errors.New("name is required")
 )
 
+type Relationships struct {
+	Childs  []Person `json:"childs,omitempty"`
+	Parents []Person `json:"parents,omitempty"`
+}
+type AuditTrail struct {
+	CreatedAt string `json:"createdAt,omitempty"`
+	UpdatedAt string `json:"updatedAt,omitempty"`
+}
+
 type Person struct {
-	ID        int64  `json:"id"`
-	UUID      string `json:"uuid"`
-	Name      string `json:"name"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	ID             int64  `json:"id,omitempty"`
+	UUID           string `json:"uuid"`
+	Name           string `json:"name"`
+	*Relationships `json:"relationships,omitempty"`
+	AuditTrail
 }
 
 func NewPerson(name string) (*Person, error) {
-	product := &Person{
+	person := &Person{
 		UUID: entity.NewStrigID(),
 		Name: name,
 	}
 
-	err := product.Validate()
+	err := person.Validate()
 	if err != nil {
 		return nil, err
 	}
 
-	return product, nil
+	return person, nil
 }
 
 func (p *Person) Validate() error {

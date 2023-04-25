@@ -69,6 +69,30 @@ func (p *Person) FindByUUID(ctx context.Context, uuid string) (*entity.Person, e
 	}
 	return &person[0], nil
 }
+func (p *Person) FindByName(ctx context.Context, name string) (*entity.Person, error) {
+	session := helpers.NewSession(ctx, p.DBDriver, neo4j.AccessModeWrite)
+	defer session.Close(ctx)
+
+	if name == "" {
+		return nil, errors.New("uuid is empty")
+	}
+
+	result, err := session.Run(ctx, "MATCH (p:PERSON {name: $name}) RETURN p", map[string]interface{}{"name": name})
+	if err != nil {
+		fmt.Println("Run Error")
+		return nil, err
+	}
+
+	person, err := helpers.GetDbResponseParsed(ctx, result, entity.Person{})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(person) == 0 {
+		return nil, nil
+	}
+	return &person[0], nil
+}
 
 func (p *Person) Update(ctx context.Context, person *entity.Person) (*entity.Person, error) {
 	session := helpers.NewSession(ctx, p.DBDriver, neo4j.AccessModeWrite)
@@ -105,4 +129,49 @@ func (p *Person) Delete(ctx context.Context, uuid string) error {
 	}
 
 	return nil
+}
+
+func (p *Person) FindAncestors(ctx context.Context, person *entity.Person) ([]*entity.Person, error) {
+	session := helpers.NewSession(ctx, p.DBDriver, neo4j.AccessModeWrite)
+	defer session.Close(ctx)
+
+	// result, err := session.Run(ctx, "MATCH (p:PERSON {uuid: $uuid})-[:IS_PARENT_OF*1..]->(a:PERSON) RETURN a", map[string]interface{}{"uuid": uuid})
+	query := `
+		match (main:PERSON{uuid: $uuid})
+		call {
+				with main
+				match (main)<-[r:IS_PARENT]-(first_ancestor:PERSON)
+				match (main)-[ch:IS_PARENT]->(child:PERSON)
+				with main, collect(distinct first_ancestor{.name, .uuid}) as parents, collect(distinct child{.name, .uuid}) as childs
+				with main, main{parents, childs} as relationships
+				return main{.name, .uuid, relationships} as res
+			union
+				with main
+				match (ancestor:PERSON)-[:IS_PARENT*]->(main)
+				with ancestor
+				match (ancestor)<-[:IS_PARENT]-(pa:PERSON)
+				with ancestor, pa
+				match (ancestor)-[:IS_PARENT]->(ch:PERSON)
+				with  ancestor, collect(distinct pa{.name, .uuid}) as parents, collect(distinct ch{.name, .uuid}) as childs
+				with ancestor, ancestor{parents, childs} as relationships
+				return ancestor{.name, .uuid, relationships} as res
+		}
+		return res
+	`
+	result, err := session.Run(ctx, query, map[string]interface{}{"uuid": person.UUID})
+	if err != nil {
+		fmt.Println("Run Error")
+		return nil, err
+	}
+
+	personParsed, err := helpers.GetDbResponseAncestors(ctx, result, &entity.Person{})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(personParsed) == 0 {
+		return nil, nil
+	}
+	return personParsed, nil
 }
