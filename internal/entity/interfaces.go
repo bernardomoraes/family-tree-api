@@ -21,4 +21,5 @@ type PersonRepositoryInterface interface {
 type RelationshipRepositoryInterface interface {
 	CreateIsParent(ctx context.Context, parent Person, child Person) error
 	FindRelationship(ctx context.Context, relationship *Relationship) (*Relationship, error)
+	GetDegreeSeparation(ctx context.Context, person1 *Person, person2 *Person) (int, error)
 }

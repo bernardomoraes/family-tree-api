@@ -38,6 +38,7 @@ func main() {
 
 	// Relationship routes
 	webserver.AddMethod("POST", "/relationship", webRelationshipHandler.CreateIsParent)
+	webserver.AddMethod("GET", "/relationship/{start}/bacon_number/{end}", webRelationshipHandler.GetBaconNumber)
 
 	webserver.Start()
 }

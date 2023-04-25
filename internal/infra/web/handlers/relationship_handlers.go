@@ -8,6 +8,7 @@ import (
 	"github.com/bernardomoraes/family-tree/internal/dto"
 	"github.com/bernardomoraes/family-tree/internal/entity"
 	usecase "github.com/bernardomoraes/family-tree/internal/usecase/relationship"
+	"github.com/go-chi/chi/v5"
 )
 
 type RelationshipHandler struct {
@@ -65,4 +66,31 @@ func (h *RelationshipHandler) CreateIsParent(rw http.ResponseWriter, r *http.Req
 	json.NewEncoder(rw).Encode(map[string]interface{}{
 		"message": "Relationship created",
 	})
+}
+
+func (h *RelationshipHandler) GetBaconNumber(rw http.ResponseWriter, r *http.Request) {
+	input := dto.GetBaconNumberInput{
+		StartIdentifier: chi.URLParam(r, "start"),
+		EndIdentifier:   chi.URLParam(r, "end"),
+	}
+
+	if input.StartIdentifier == "" || input.EndIdentifier == "" {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": "Missing URL paramenters",
+		})
+	}
+
+	output, err := usecase.NewGetBaconNumberUseCase(h.RelationshipDB).Execute(r.Context(), &input)
+
+	if err != nil {
+		rw.WriteHeader(http.StatusNotAcceptable)
+		json.NewEncoder(rw).Encode(map[string]interface{}{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+	json.NewEncoder(rw).Encode(output)
 }

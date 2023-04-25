@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/bernardomoraes/family-tree/internal/entity"
@@ -130,4 +131,39 @@ func (r *Relationship) FindRelationshipsFromPerson(ctx context.Context, person e
 	fmt.Println("resParsed:", resParsed)
 
 	return resParsed, nil
+}
+
+func (r *Relationship) GetDegreeSeparation(ctx context.Context, person1 *entity.Person, person2 *entity.Person) (int, error) {
+	session := helpers.NewSession(ctx, r.DBDriver, neo4j.AccessModeWrite)
+	defer session.Close(ctx)
+
+	parameters := map[string]interface{}{
+		"start": person1.UUID,
+		"end":   person2.UUID,
+	}
+	query := `
+	MATCH (p1:PERSON {uuid:$start})
+	MATCH (p2:PERSON {uuid:$end})
+	MATCH p=shortestPath((p1)-[*]-(p2))
+	RETURN length(p) as bc;
+	`
+
+	dbResult, err := session.Run(ctx, query, parameters)
+	if err != nil {
+		return 0, err
+	}
+	record := dbResult.Record()
+	if !dbResult.NextRecord(ctx, &record) {
+		return 0, errors.New("no path")
+	}
+	fmt.Println(record)
+
+	recordItem, found := dbResult.Record().Get(record.Keys[0])
+	if !found {
+		return 0, errors.New("no path")
+	}
+
+	fmt.Println("recordItem:", recordItem)
+
+	return int(recordItem.(int64)), nil
 }

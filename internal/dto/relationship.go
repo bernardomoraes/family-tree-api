@@ -24,3 +24,12 @@ type CreateParentRelationshipOutput struct {
 type CreateParentRelationshipBulkInput struct {
 	Relationships []CreateParentRelationshipInput `json:"relationships" validate:"required"`
 }
+
+type GetBaconNumberInput struct {
+	StartIdentifier string `json:"start" validate:"required"`
+	EndIdentifier   string `json:"end" validate:"required"`
+}
+
+type GetBaconNumberOutput struct {
+	BaconNumber int `json:"bacon_number"`
+}
