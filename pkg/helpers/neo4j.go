@@ -67,7 +67,7 @@ func GetDbResponse[T any](ctx context.Context, result neo4j.ResultWithContext, r
 	}
 	return response, nil
 }
-func GetDbResponseAncestors[T *entity.Person](ctx context.Context, result neo4j.ResultWithContext, resultType *entity.Person) ([]T, error) {
+func GetDbResponseMap[T *entity.Person](ctx context.Context, result neo4j.ResultWithContext, resultType *entity.Person) ([]T, error) {
 	record := result.Record()
 	response := []T{}
 
@@ -90,8 +90,6 @@ func GetDbResponseAncestors[T *entity.Person](ctx context.Context, result neo4j.
 			fmt.Println("Error decoding record item")
 			return nil, err
 		}
-
-		fmt.Println("resultType:", resultType)
 		response = append(response, resultType)
 	}
 	return response, nil

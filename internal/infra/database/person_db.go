@@ -52,14 +52,24 @@ func (p *Person) FindByUUID(ctx context.Context, uuid string) (*entity.Person, e
 	if uuid == "" {
 		return nil, errors.New("uuid is empty")
 	}
+	findByUUIDQuery := `
+		match (n:PERSON {uuid: $uuid}) 
+		optional match (n)<-[:IS_PARENT]-(rp)
+		optional match (n)-[:IS_PARENT]->(rc)
+		with n, collect(distinct rp{.name, .uuid}) as parents, collect(distinct rc{.name, .uuid}) as childs
+		with n, n{parents, childs} as relationships
+		return n{.*, relationships}
+	`
 
-	result, err := session.Run(ctx, "MATCH (p:PERSON {uuid: $uuid}) RETURN p", map[string]interface{}{"uuid": uuid})
+	result, err := session.Run(ctx, findByUUIDQuery, map[string]interface{}{"uuid": uuid})
 	if err != nil {
 		fmt.Println("Run Error")
 		return nil, err
 	}
 
-	person, err := helpers.GetDbResponseParsed(ctx, result, entity.Person{})
+	person, err := helpers.GetDbResponseMap(ctx, result, &entity.Person{})
+
+	fmt.Println("person:", person[0])
 	if err != nil {
 		return nil, err
 	}
@@ -67,23 +77,31 @@ func (p *Person) FindByUUID(ctx context.Context, uuid string) (*entity.Person, e
 	if len(person) == 0 {
 		return nil, nil
 	}
-	return &person[0], nil
+	return person[0], nil
 }
 func (p *Person) FindByName(ctx context.Context, name string) (*entity.Person, error) {
 	session := helpers.NewSession(ctx, p.DBDriver, neo4j.AccessModeWrite)
 	defer session.Close(ctx)
 
 	if name == "" {
-		return nil, errors.New("uuid is empty")
+		return nil, errors.New("name is empty")
 	}
+	findByNameQuery := `
+		match (n:PERSON {name: $name}) 
+		optional match (n)<-[:IS_PARENT]-(rp)
+		optional match (n)-[:IS_PARENT]->(rc)
+		with n, collect(distinct rp{.name, .uuid}) as parents, collect(distinct rc{.name, .uuid}) as childs
+		with n, n{parents, childs} as relationships
+		return n{.*, relationships}
+	`
 
-	result, err := session.Run(ctx, "MATCH (p:PERSON {name: $name}) RETURN p", map[string]interface{}{"name": name})
+	result, err := session.Run(ctx, findByNameQuery, map[string]interface{}{"name": name})
 	if err != nil {
 		fmt.Println("Run Error")
 		return nil, err
 	}
 
-	person, err := helpers.GetDbResponseParsed(ctx, result, entity.Person{})
+	person, err := helpers.GetDbResponse(ctx, result, entity.Person{})
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +182,7 @@ func (p *Person) FindAncestors(ctx context.Context, person *entity.Person) ([]*e
 		return nil, err
 	}
 
-	personParsed, err := helpers.GetDbResponseAncestors(ctx, result, &entity.Person{})
+	personParsed, err := helpers.GetDbResponseMap(ctx, result, &entity.Person{})
 
 	if err != nil {
 		return nil, err

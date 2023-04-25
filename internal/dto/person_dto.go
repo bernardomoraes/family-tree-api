@@ -20,7 +20,7 @@ type FindPersonInputDTO struct {
 
 type FindPersonOutputDTO struct {
 	Person
-	Relationships []Relationship `json:"relationships"`
+	Relationships RelationshipList `json:"relationships"`
 	AuditTrail
 }
 

@@ -100,3 +100,34 @@ func (r *Relationship) FindRelationship(ctx context.Context, relationship *entit
 
 	return &resParsed[0], nil
 }
+
+func (r *Relationship) FindRelationshipsFromPerson(ctx context.Context, person entity.Person) ([]entity.Relationship, error) {
+	session := helpers.NewSession(ctx, r.DBDriver, neo4j.AccessModeWrite)
+	defer session.Close(ctx)
+
+	parameters := map[string]interface{}{
+		"uuid": person.UUID,
+	}
+	query := `
+	match (n:PERSON {uuid: $uuid}) 
+	optional match (n)<-[:IS_PARENT]-(rp)
+	optional match (n)-[:IS_PARENT]->(rc)
+	with n, collect(distinct rp{.name, .uuid}) as parent, collect(distinct rc{.name, .uuid}) as child
+	with n, n{parent, child} as relationships
+	return n{.*, relationships}
+	`
+
+	dbResult, err := session.Run(ctx, query, parameters)
+	if err != nil {
+		return nil, err
+	}
+
+	resParsed, err := helpers.GetDbResponse(ctx, dbResult, entity.Relationship{})
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("resParsed:", resParsed)
+
+	return resParsed, nil
+}

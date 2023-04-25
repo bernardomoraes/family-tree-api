@@ -44,7 +44,7 @@ func (f *FindOnePersonUseCase) Execute(ctx context.Context, input *dto.FindPerso
 			Name: person.Name,
 			UUID: person.UUID,
 		},
-		Relationships: []dto.Relationship{},
+		Relationships: dto.RelationshipList(*person.Relationships),
 		AuditTrail: dto.AuditTrail{
 			CreatedAt: person.CreatedAt,
 			UpdatedAt: person.UpdatedAt,
