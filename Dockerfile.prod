@@ -2,9 +2,9 @@ FROM golang:latest as builder
 
 WORKDIR /app
 
-COPY ./src .
+COPY . .
 
-RUN GOOS=linux CGO_ENABLED=0 go build -ldflags="-w -s" -o server .
+RUN GOOS=linux CGO_ENABLED=0 go build -ldflags="-w -s" -o server ./cmd/server/main.go
 
 
 FROM scratch
