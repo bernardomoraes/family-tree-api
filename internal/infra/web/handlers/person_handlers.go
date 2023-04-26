@@ -22,6 +22,19 @@ func NewWebPersonHandler(db entity.PersonRepositoryInterface) *PersonHandler {
 	}
 }
 
+// @Summary Create a person
+// @Description Create a person
+// @ID create-person
+// @Tags Person
+// @Accept json
+// @Produce json
+// @Param person body dot.CreatePersonInputDTO true "Person"
+// @Success 201 {object} dto.CreatePersonOutputDTO
+// @Router /person [post]
+// @Suceess 202 {object} dto.CreatePersonOutputDTO
+// @Failure 400 {object} dto.ErrorBody
+// @Failure 500 {object} dto.ErrorBody
+
 func (h *PersonHandler) Create(rw http.ResponseWriter, r *http.Request) {
 	var person dto.CreatePersonInputDTO
 

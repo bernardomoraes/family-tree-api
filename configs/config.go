@@ -38,6 +38,10 @@ func LoadConfig(path string) (*conf, error) {
 		panic(err)
 	}
 
+	if cfg.WebserverPort == "" {
+		cfg.WebserverPort = "8080"
+	}
+
 	cfg.TokenAuth = jwtauth.New("HS256", []byte(cfg.JWTSecret), nil)
 
 	return cfg, nil

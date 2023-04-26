@@ -1,0 +1,13 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    email: bernardo.moraes.silva@gmail.com
+    name: Bernardo Moraes
+    url: https://www.linkedin.com/in/bernardomoraes/
+  description: Simple API to generate a genealogical tree
+  termsOfService: http://swagger.io/terms/
+  title: Family Tree API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

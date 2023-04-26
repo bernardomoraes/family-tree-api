@@ -10,3 +10,7 @@ type FindRelationshipOutput struct {
 	Relationship string `json:"relationship"`
 	RelatedUUID  string `json:"related_uuid"`
 }
+
+type ErrorBody struct {
+	Message string `json:"message"`
+}

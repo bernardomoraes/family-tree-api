@@ -57,7 +57,7 @@ This project aims to create an API to manage a family tree with the ability to c
 
 > **Neo4j browser** available at `http://localhost:7474/browser/`. You can use it to inspect the database and run Cypher queries.
 
-> ~~**Swagger UI** available at `http://localhost:8080/docs/index.html`. You can use it to test the API endpoints.~~ (WIP)
+> ~~**Swagger UI** available at `http://localhost:8080/docs/index.html`. You can use it to test the API endpoints.~~ (For some reason, the Swagger UI is not working properly with the API, I tried to fix it but I couldn't find the solution.)
 
 ## **Technical Decisions**
 - **[Chi](https://go-chi.io/)** as the router.

@@ -1,0 +1,17 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Simple API to generate a genealogical tree",
+        "title": "Family Tree API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Bernardo Moraes",
+            "url": "https://www.linkedin.com/in/bernardomoraes/",
+            "email": "bernardo.moraes.silva@gmail.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {}
+}

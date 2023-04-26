@@ -5,11 +5,28 @@ import (
 	"fmt"
 
 	"github.com/bernardomoraes/family-tree/configs"
+	_ "github.com/bernardomoraes/family-tree/docs"
 	"github.com/bernardomoraes/family-tree/internal/infra/database"
 	"github.com/bernardomoraes/family-tree/internal/infra/web/handlers"
 	"github.com/bernardomoraes/family-tree/internal/infra/web/webserver"
 	"github.com/bernardomoraes/family-tree/pkg/helpers"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
+
+// Swagger documentation
+
+//	@title			Family Tree API
+//	@version		1.0
+//	@description	Simple API to generate a genealogical tree
+//	@termsOfService	http://swagger.io/terms/
+
+//	@host		localhost:8080
+//	@BasePath	/
+
+//	@contact.name	Bernardo Moraes
+//	@contact.email	bernardo.moraes.silva@gmail.com
+//	@contact.url		https://www.linkedin.com/in/bernardomoraes/
 
 func main() {
 	config, _ := configs.LoadConfig(".")
@@ -41,5 +58,9 @@ func main() {
 	webserver.AddMethod("POST", "/relationship", webRelationshipHandler.CreateIsParent)
 	webserver.AddMethod("GET", "/relationship/{start}/bacon_number/{end}", webRelationshipHandler.GetBaconNumber)
 
+	// Swagger routes
+	webserver.AddMethod("GET", "/docs/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:"+config.WebserverPort+"/docs/doc.json"),
+	))
 	webserver.Start()
 }
